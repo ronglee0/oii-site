@@ -74,7 +74,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				name: "Matrix",
 				url: "https://matrix.to/#/@dooki:745566.xyz",
 				external: true,
-				icon: "fa7-brands:matrix",
+				icon: "fa7-brands:comments",
 			},
 		],
 	});
