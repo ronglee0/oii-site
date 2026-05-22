@@ -1,0 +1,7 @@
+{
+  "name": "oii-site",
+  "compatibility_date": "2026-05-01", // Update to the day you deploy
+  "assets": {
+    "directory": "./dist",
+  }
+}
