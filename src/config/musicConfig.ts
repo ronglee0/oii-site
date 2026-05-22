@@ -52,7 +52,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 			{
 				name: "虚拟",
 				artist: "陈粒",
-				url: "/assets/music/虚拟-陈粒.mp3",
+				url: "/assets/music/music.mp3",
 				cover: "/assets/music/cover/music.jpg",
 				lrc: "",
 			},
