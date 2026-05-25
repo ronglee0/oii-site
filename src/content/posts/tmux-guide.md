@@ -36,14 +36,7 @@ tmux 有三个重要的层级概念：
 - **Window（窗口）**：类似浏览器标签页，一个会话可以有多个窗口
 - **Pane（面板）**：窗口中的分屏区域，可以在一个窗口中同时查看多个终端
 
-```mermaid
-graph TD
-    A[Session 会话] --> B[Window 1 窗口]
-    A --> C[Window 2 窗口]
-    B --> D[Pane 面板]
-    B --> E[Pane 面板]
-    C --> F[Pane 面板]
-```
+层级关系：`Session → Window → Pane`，一个 Session 可包含多个 Window，一个 Window 可分割为多个 Pane。
 
 ## 基本操作
 
