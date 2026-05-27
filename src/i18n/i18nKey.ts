@@ -293,6 +293,15 @@ enum I18nKey {
 	codeCollapsibleExpanded = "codeCollapsibleExpanded",
 	codeCollapsibleCollapsed = "codeCollapsibleCollapsed",
 
+	// 备忘录页面
+	memos = "memos",
+	memosSubtitle = "memosSubtitle",
+	memosLoadMore = "memosLoadMore",
+	memosLoading = "memosLoading",
+	memosError = "memosError",
+	memosEmpty = "memosEmpty",
+	memosEmptyDescription = "memosEmptyDescription",
+
 	// 相册页面
 	gallery = "gallery",
 	galleryDescription = "galleryDescription",

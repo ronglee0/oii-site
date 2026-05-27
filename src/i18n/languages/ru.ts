@@ -307,6 +307,15 @@ export const ru: Translation = {
 	[Key.codeCollapsibleExpanded]: "Блок кода развернут",
 	[Key.codeCollapsibleCollapsed]: "Блок кода свернут",
 
+	// Страница заметок
+	[Key.memos]: "Заметки",
+	[Key.memosSubtitle]: "Короткие мысли и заметки",
+	[Key.memosLoadMore]: "Загрузить ещё",
+	[Key.memosLoading]: "Загрузка...",
+	[Key.memosError]: "Не удалось загрузить заметки, попробуйте позже",
+	[Key.memosEmpty]: "Заметок пока нет",
+	[Key.memosEmptyDescription]: "Заметки появятся здесь после публикации.",
+
 	// Страница галереи
 	[Key.gallery]: "Галерея",
 	[Key.galleryDescription]: "Запечатлеть прекрасные моменты жизни",

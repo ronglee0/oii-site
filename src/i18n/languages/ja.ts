@@ -305,6 +305,15 @@ export const ja: Translation = {
 	[Key.codeCollapsibleExpanded]: "コードブロックが展開されました",
 	[Key.codeCollapsibleCollapsed]: "コードブロックが折りたたまれました",
 
+	// メモページ
+	[Key.memos]: "メモ",
+	[Key.memosSubtitle]: "短い考えとメモ",
+	[Key.memosLoadMore]: "もっと見る",
+	[Key.memosLoading]: "読み込み中...",
+	[Key.memosError]: "読み込みに失敗しました。後でもう一度お試しください",
+	[Key.memosEmpty]: "メモはまだありません",
+	[Key.memosEmptyDescription]: "メモを公開するとここに表示されます。",
+
 	// ギャラリーページ
 	[Key.gallery]: "ギャラリー",
 	[Key.galleryDescription]: "人生の美しい瞬間を記録する",

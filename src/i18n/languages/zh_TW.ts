@@ -299,6 +299,15 @@ export const zh_TW: Translation = {
 	[Key.codeCollapsibleExpanded]: "代碼區塊已展開",
 	[Key.codeCollapsibleCollapsed]: "代碼區塊已折疊",
 
+	// 備忘錄頁面
+	[Key.memos]: "備忘錄",
+	[Key.memosSubtitle]: "短想法與筆記",
+	[Key.memosLoadMore]: "載入更多",
+	[Key.memosLoading]: "載入中...",
+	[Key.memosError]: "載入失敗，請稍後重試",
+	[Key.memosEmpty]: "暫無備忘錄",
+	[Key.memosEmptyDescription]: "發佈備忘錄後將顯示在此處。",
+
 	// 相簿頁面
 	[Key.gallery]: "相簿",
 	[Key.galleryDescription]: "記錄生活中的美好瞬間",

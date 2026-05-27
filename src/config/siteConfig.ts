@@ -138,6 +138,8 @@ export const siteConfig: SiteConfig = {
 		bangumi: false,
 		// 相册页面开关
 		gallery: true,
+		// 备忘录页面开关
+		memos: true,
 	},
 
 	// 分类导航栏开关，在首页和归档页顶部显示分类快捷导航

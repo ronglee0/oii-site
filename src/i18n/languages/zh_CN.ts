@@ -298,6 +298,14 @@ export const zh_CN: Translation = {
 	[Key.codeCollapsibleCollapsed]: "代码块已折叠",
 
 	// 相册页面
+	[Key.memos]: "备忘录",
+	[Key.memosSubtitle]: "短想法与笔记",
+	[Key.memosLoadMore]: "加载更多",
+	[Key.memosLoading]: "加载中...",
+	[Key.memosError]: "加载失败，请稍后重试",
+	[Key.memosEmpty]: "暂无备忘录",
+	[Key.memosEmptyDescription]: "发布备忘录后将显示在此处。",
+
 	[Key.gallery]: "相册",
 	[Key.galleryDescription]: "记录生活中的美好瞬间",
 	[Key.galleryPhotos]: "张照片",

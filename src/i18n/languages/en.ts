@@ -307,6 +307,14 @@ export const en: Translation = {
 	[Key.codeCollapsibleCollapsed]: "Code block collapsed",
 
 	// Gallery Page
+	[Key.memos]: "Memos",
+	[Key.memosSubtitle]: "Short thoughts and notes",
+	[Key.memosLoadMore]: "Load More",
+	[Key.memosLoading]: "Loading...",
+	[Key.memosError]: "Failed to load memos, please try again later",
+	[Key.memosEmpty]: "No memos yet",
+	[Key.memosEmptyDescription]: "Memos will appear here once they are published.",
+
 	[Key.gallery]: "Gallery",
 	[Key.galleryDescription]: "Capturing beautiful moments in life",
 	[Key.galleryPhotos]: "photos",
