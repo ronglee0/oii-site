@@ -67,9 +67,14 @@ function formatTime(iso: string): string {
 	}
 }
 
-function getResourceUrl(name: string): string {
+function getResourceUrl(resource: { name: string; externalLink?: string }): string {
+	if (resource.externalLink) return resource.externalLink
+
 	const token = memosConfig.accessToken
-	return `${memosConfig.apiUrl}/file/${name}${token ? `?token=${token}` : ""}`
+	// resource.name 格式为 "resources/456"，提取数字 ID
+	const id = resource.name.split("/").pop()
+	const baseUrl = `${memosConfig.apiUrl}/file/resources/${id}`
+	return token ? `${baseUrl}?token=${token}` : baseUrl
 }
 ---
 
@@ -112,9 +117,9 @@ function getResourceUrl(name: string): string {
                 {images.length > 0 && (
                   <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
                     {images.map((img) => (
-                      <a href={getResourceUrl(img.name)} target="_blank" rel="noopener noreferrer">
+                      <a href={getResourceUrl(img)} target="_blank" rel="noopener noreferrer">
                         <img
-                          src={getResourceUrl(img.name)}
+                          src={getResourceUrl(img)}
                           alt={img.filename || ""}
                           loading="lazy"
                           class="rounded-lg w-full h-32 object-cover hover:opacity-80 transition-opacity"
@@ -127,7 +132,7 @@ function getResourceUrl(name: string): string {
                   <div class="flex flex-wrap gap-2 mt-2">
                     {files.map((f) => (
                       <a
-                        href={getResourceUrl(f.name)}
+                        href={getResourceUrl(f)}
                         target="_blank"
                         rel="noopener noreferrer"
                         class="link text-xs"
