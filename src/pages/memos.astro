@@ -67,14 +67,14 @@ function formatTime(iso: string): string {
 	}
 }
 
-function getResourceUrl(resource: { name: string; externalLink?: string }): string {
-	if (resource.externalLink) return resource.externalLink
-
+// 构建附件下载 URL
+// Memos 的文件访问模式: /file/{name}/{filename}
+// 例如: /file/attachments/5c90a5db8929459da21e01/photo.jpg
+function getAttachmentUrl(att: { name: string; filename: string; externalLink?: string }): string {
+	if (att.externalLink) return att.externalLink
+	const base = `${memosConfig.apiUrl}/file/${att.name}/${encodeURIComponent(att.filename)}`
 	const token = memosConfig.accessToken
-	// resource.name 格式为 "resources/456"，提取数字 ID
-	const id = resource.name.split("/").pop()
-	const baseUrl = `${memosConfig.apiUrl}/file/resources/${id}`
-	return token ? `${baseUrl}?token=${token}` : baseUrl
+	return token ? `${base}?token=${token}` : base
 }
 ---
 
@@ -100,8 +100,8 @@ function getResourceUrl(resource: { name: string; externalLink?: string }): stri
       {memos.length > 0 ? (
         <div class="flex flex-col">
           {memos.map((memo, index) => {
-            const images = memo.resources?.filter((r) => r.type?.startsWith("image/")) || []
-            const files = memo.resources?.filter((r) => !r.type?.startsWith("image/")) || []
+            const images = memo.attachments?.filter((a) => a.type?.startsWith("image/")) || []
+            const files = memo.attachments?.filter((a) => !a.type?.startsWith("image/")) || []
             return (
               <div
                 class="py-5 border-b border-dashed border-(--line-divider) last:border-b-0 first:pt-0 last:pb-0"
@@ -117,9 +117,9 @@ function getResourceUrl(resource: { name: string; externalLink?: string }): stri
                 {images.length > 0 && (
                   <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
                     {images.map((img) => (
-                      <a href={getResourceUrl(img)} target="_blank" rel="noopener noreferrer">
+                      <a href={getAttachmentUrl(img)} target="_blank" rel="noopener noreferrer">
                         <img
-                          src={getResourceUrl(img)}
+                          src={getAttachmentUrl(img)}
                           alt={img.filename || ""}
                           loading="lazy"
                           class="rounded-lg w-full h-32 object-cover hover:opacity-80 transition-opacity"
@@ -132,7 +132,7 @@ function getResourceUrl(resource: { name: string; externalLink?: string }): stri
                   <div class="flex flex-wrap gap-2 mt-2">
                     {files.map((f) => (
                       <a
-                        href={getResourceUrl(f)}
+                        href={getAttachmentUrl(f)}
                         target="_blank"
                         rel="noopener noreferrer"
                         class="link text-xs"

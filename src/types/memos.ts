@@ -5,14 +5,16 @@ export interface Memo {
 	createTime: string
 	updateTime: string
 	visibility: "VISIBILITY_UNSPECIFIED" | "PRIVATE" | "PROTECTED" | "PUBLIC"
-	resources?: MemoResource[]
+	attachments?: MemoAttachment[]
 }
 
-export interface MemoResource {
+export interface MemoAttachment {
+	id: number
 	name: string
 	uid: string
 	filename: string
 	type: string
+	size: number
 	externalLink?: string
 }
 
