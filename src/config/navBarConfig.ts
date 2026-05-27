@@ -18,6 +18,11 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		LinkPreset.Archive,
 	];
 
+	// 根据配置决定是否添加备忘录，在siteConfig关闭pages.memos时导航栏不显示备忘录
+	if (siteConfig.pages.memos) {
+		links.push(LinkPreset.Memos);
+	}
+
 	// 根据配置决定是否添加友链，在siteConfig关闭pages.friends时导航栏不显示友链
 	if (siteConfig.pages.friends) {
 		links.push(LinkPreset.Friends);
@@ -36,9 +41,6 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		children: [
 			// 根据配置决定是否添加相册，在siteConfig关闭pages.gallery时导航栏不显示相册
 			...(siteConfig.pages.gallery ? [LinkPreset.Gallery] : []),
-
-			// 根据配置决定是否添加备忘录，在siteConfig关闭pages.memos时导航栏不显示备忘录
-			...(siteConfig.pages.memos ? [LinkPreset.Memos] : []),
 
 			// 根据配置决定是否添加番组计划，在siteConfig关闭pages.bangumi时导航栏不显示番组计划
 			...(siteConfig.pages.bangumi ? [LinkPreset.Bangumi] : []),
