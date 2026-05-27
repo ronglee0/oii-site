@@ -1,9 +1,11 @@
 ---
 import { Icon } from "astro-icon/components"
+import { Marked } from "marked"
 import { memosConfig, siteConfig } from "@/config"
 import I18nKey from "@/i18n/i18nKey"
 import { i18n } from "@/i18n/translation"
 import MainGridLayout from "@/layouts/MainGridLayout.astro"
+import type { Memo, MemosApiResponse } from "@/types/memos"
 
 if (!siteConfig.pages.memos) {
 	return Astro.redirect("/404/")
@@ -11,6 +13,64 @@ if (!siteConfig.pages.memos) {
 
 const title = i18n(I18nKey.memos)
 const description = i18n(I18nKey.memosSubtitle)
+
+const MAX_MEMOS = 35
+
+// 构建时抓取 memos
+let memos: Memo[] = []
+let fetchError = false
+
+try {
+	const headers: Record<string, string> = { Accept: "application/json" }
+	if (memosConfig.accessToken) {
+		headers["Authorization"] = `Bearer ${memosConfig.accessToken}`
+	}
+
+	const resp = await fetch(
+		`${memosConfig.apiUrl}/api/v1/memos?pageSize=${MAX_MEMOS}`,
+		{ headers },
+	)
+
+	if (resp.ok) {
+		const data: MemosApiResponse = await resp.json()
+		memos = (data.memos || []).filter(
+			(m) => m.visibility === "PUBLIC",
+		).slice(0, MAX_MEMOS)
+	} else {
+		console.warn(`[Memos] API 请求失败: ${resp.status}`)
+		fetchError = true
+	}
+} catch (e) {
+	console.warn("[Memos] 无法连接 API:", e)
+	fetchError = true
+}
+
+// markdown 渲染
+const marked = new Marked()
+
+function renderMarkdown(content: string): string {
+	return marked.parse(content, { async: false }) as string
+}
+
+function formatTime(iso: string): string {
+	try {
+		const locale = (siteConfig.lang || "zh_CN").replace("_", "-")
+		return new Intl.DateTimeFormat(locale, {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		}).format(new Date(iso))
+	} catch {
+		return iso
+	}
+}
+
+function getResourceUrl(name: string): string {
+	const token = memosConfig.accessToken
+	return `${memosConfig.apiUrl}/file/${name}${token ? `?token=${token}` : ""}`
+}
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -31,310 +91,68 @@ const description = i18n(I18nKey.memosSubtitle)
         </p>
       </div>
 
-      <!-- Feed 容器 -->
-      <div id="memos-feed-container" class="flex flex-col"></div>
-
-      <!-- 加载状态 -->
-      <div id="memos-loading" class="hidden py-10 text-center">
-        <div class="inline-block w-6 h-6 border-2 border-(--primary) border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{i18n(I18nKey.memosLoading)}</p>
-      </div>
-
-      <!-- 空状态 -->
-      <div id="memos-empty" class="hidden py-10 text-center">
-        <p class="text-neutral-500 dark:text-neutral-400">{i18n(I18nKey.memosEmpty)}</p>
-        <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-1">{i18n(I18nKey.memosEmptyDescription)}</p>
-      </div>
-
-      <!-- 错误状态 -->
-      <div id="memos-error" class="hidden py-10 text-center">
-        <p class="text-red-500">{i18n(I18nKey.memosError)}</p>
-        <button
-          id="memos-retry-btn"
-          class="btn-regular px-4 py-2 mt-3 rounded-lg text-sm"
-        >
-          {i18n(I18nKey.memosLoadMore)}
-        </button>
-      </div>
-
-      <!-- Load More -->
-      <div id="memos-load-more-wrapper" class="hidden mt-6 text-center">
-        <button
-          id="memos-load-more-btn"
-          class="btn-regular px-6 py-2.5 rounded-lg text-sm font-medium"
-        >
-          {i18n(I18nKey.memosLoadMore)}
-        </button>
-      </div>
+      <!-- Memo 列表 -->
+      {memos.length > 0 ? (
+        <div class="flex flex-col">
+          {memos.map((memo, index) => {
+            const images = memo.resources?.filter((r) => r.type?.startsWith("image/")) || []
+            const files = memo.resources?.filter((r) => !r.type?.startsWith("image/")) || []
+            return (
+              <div
+                class="py-5 border-b border-dashed border-(--line-divider) last:border-b-0 first:pt-0 last:pb-0"
+                style={`animation-delay: calc(var(--content-delay) + ${index * 50}ms)`}
+              >
+                <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-2">
+                  {formatTime(memo.createTime)}
+                </div>
+                <div
+                  class="custom-md text-sm leading-relaxed text-neutral-800 dark:text-neutral-200"
+                  set:html={renderMarkdown(memo.content || "")}
+                />
+                {images.length > 0 && (
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+                    {images.map((img) => (
+                      <a href={getResourceUrl(img.name)} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={getResourceUrl(img.name)}
+                          alt={img.filename || ""}
+                          loading="lazy"
+                          class="rounded-lg w-full h-32 object-cover hover:opacity-80 transition-opacity"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {files.length > 0 && (
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    {files.map((f) => (
+                      <a
+                        href={getResourceUrl(f.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="link text-xs"
+                      >
+                        {f.filename || f.name}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div class="py-10 text-center">
+          {fetchError ? (
+            <p class="text-red-500">{i18n(I18nKey.memosError)}</p>
+          ) : (
+            <>
+              <p class="text-neutral-500 dark:text-neutral-400">{i18n(I18nKey.memosEmpty)}</p>
+              <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-1">{i18n(I18nKey.memosEmptyDescription)}</p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   </div>
 </MainGridLayout>
-
-<script is:inline define:vars={{
-  apiUrl: memosConfig.apiUrl,
-  accessToken: memosConfig.accessToken || "",
-  pageSize: memosConfig.pageSize,
-  i18nLoading: i18n(I18nKey.memosLoading),
-  i18nError: i18n(I18nKey.memosError),
-  i18nLoadMore: i18n(I18nKey.memosLoadMore),
-  i18nEmpty: i18n(I18nKey.memosEmpty),
-  i18nEmptyDesc: i18n(I18nKey.memosEmptyDescription),
-  siteLocale: siteConfig.lang || "zh_CN",
-}}>
-  let memosNextPageToken = null;
-  let memosIsLoading = false;
-  let memosHasMore = true;
-
-  function memosEscapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  function memosRenderMarkdown(text) {
-    let html = memosEscapeHtml(text);
-
-    // fenced code blocks
-    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function (m, lang, code) {
-      return '<pre class="code-block"><code>' + code.trim() + "</code></pre>";
-    });
-
-    // inline code
-    html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-    // bold
-    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-    // italic
-    html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-    // strikethrough
-    html = html.replace(/~~(.*?)~~/g, "<del>$1</del>");
-
-    // links
-    html = html.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" class="link">$1</a>'
-    );
-
-    // images (standalone line)
-    html = html.replace(
-      /^!\[([^\]]*)\]\(([^)]+)\)/gm,
-      '<img src="$2" alt="$1" loading="lazy" class="rounded-lg max-w-full" />'
-    );
-
-    // unordered list items
-    html = html.replace(/^[-*+]\s+(.+)$/gm, "<li>$1</li>");
-    html = html.replace(/(<li>.*<\/li>\n?)+/g, "<ul>$&</ul>");
-
-    // ordered list items
-    html = html.replace(/^\d+\.\s+(.+)$/gm, "<li>$1</li>");
-
-    // blockquote
-    html = html.replace(
-      /^&gt;\s?(.+)$/gm,
-      '<blockquote class="border-l-2 border-(--primary) pl-3 text-neutral-600 dark:text-neutral-400">$1</blockquote>'
-    );
-
-    // horizontal rule
-    html = html.replace(/^---+$/gm, '<hr class="border-(--line-divider) my-2" />');
-
-    // headings
-    html = html.replace(/^#### (.+)$/gm, '<h4 class="text-base font-bold mt-3 mb-1">$1</h4>');
-    html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mt-3 mb-1">$1</h3>');
-    html = html.replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-3 mb-1">$1</h2>');
-    html = html.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-3 mb-1">$1</h1>');
-
-    // line breaks (but not inside pre/blockquote)
-    html = html.replace(/\n/g, "<br/>");
-
-    // clean up <br/> after block elements
-    html = html.replace(/<\/(h[1-4]|blockquote|pre|ul|li)><br\/>/g, "</$1>");
-    html = html.replace(/<br\/><(h[1-4]|blockquote|pre|ul)/g, "<$1");
-
-    return html;
-  }
-
-  function memosFormatTime(isoString) {
-    try {
-      const date = new Date(isoString);
-      return new Intl.DateTimeFormat(siteLocale.replace("_", "-"), {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch {
-      return isoString;
-    }
-  }
-
-  function memosCreateCard(memo) {
-    const div = document.createElement("div");
-    div.className =
-      "py-5 border-b border-dashed border-(--line-divider) last:border-b-0 first:pt-0 last:pb-0";
-
-    // time
-    let html =
-      '<div class="text-xs text-neutral-500 dark:text-neutral-400 mb-2">';
-    html += memosFormatTime(memo.createTime);
-    html += "</div>";
-
-    // content
-    html +=
-      '<div class="custom-md text-sm leading-relaxed text-neutral-800 dark:text-neutral-200">';
-    html += memosRenderMarkdown(memo.content || "");
-    html += "</div>";
-
-    // resources (images)
-    if (memo.resources && memo.resources.length > 0) {
-      const images = memo.resources.filter(function (r) {
-        return r.type && r.type.startsWith("image/");
-      });
-      if (images.length > 0) {
-        html +=
-          '<div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">';
-        images.forEach(function (img) {
-          const src =
-            apiUrl +
-            "/file/" +
-            img.name +
-            (accessToken ? "?token=" + accessToken : "");
-          html +=
-            '<a href="' +
-            src +
-            '" target="_blank" rel="noopener noreferrer">';
-          html +=
-            '<img src="' +
-            src +
-            '" alt="' +
-            memosEscapeHtml(img.filename || "") +
-            '" loading="lazy" class="rounded-lg w-full h-32 object-cover hover:opacity-80 transition-opacity" />';
-          html += "</a>";
-        });
-        html += "</div>";
-      }
-
-      // non-image resources
-      const files = memo.resources.filter(function (r) {
-        return !r.type || !r.type.startsWith("image/");
-      });
-      if (files.length > 0) {
-        html += '<div class="flex flex-wrap gap-2 mt-2">';
-        files.forEach(function (f) {
-          const href =
-            apiUrl +
-            "/file/" +
-            f.name +
-            (accessToken ? "?token=" + accessToken : "");
-          html +=
-            '<a href="' +
-            href +
-            '" target="_blank" rel="noopener noreferrer" class="link text-xs">';
-          html += memosEscapeHtml(f.filename || f.name);
-          html += "</a>";
-        });
-        html += "</div>";
-      }
-    }
-
-    div.innerHTML = html;
-    return div;
-  }
-
-  async function memosFetchMemos(pageToken) {
-    const params = new URLSearchParams({ pageSize: String(pageSize) });
-    if (pageToken) params.set("pageToken", pageToken);
-
-    const headers = { Accept: "application/json" };
-    if (accessToken) headers["Authorization"] = "Bearer " + accessToken;
-
-    const resp = await fetch(apiUrl + "/api/v1/memos?" + params.toString(), {
-      headers: headers,
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    return resp.json();
-  }
-
-  async function memosLoadMemos(append) {
-    if (memosIsLoading) return;
-    memosIsLoading = true;
-
-    const loadingEl = document.getElementById("memos-loading");
-    const errorEl = document.getElementById("memos-error");
-    const emptyEl = document.getElementById("memos-empty");
-    const container = document.getElementById("memos-feed-container");
-    const loadMoreWrapper = document.getElementById("memos-load-more-wrapper");
-
-    if (!append) {
-      container.innerHTML = "";
-    }
-    loadingEl.classList.remove("hidden");
-    errorEl.classList.add("hidden");
-    emptyEl.classList.add("hidden");
-    loadMoreWrapper.classList.add("hidden");
-
-    try {
-      const data = await memosFetchMemos(append ? memosNextPageToken : null);
-
-      const memos = (data.memos || []).filter(function (m) {
-        return m.visibility === "PUBLIC" || m.visibility === "PROTECTED";
-      });
-
-      if (!append && memos.length === 0) {
-        emptyEl.classList.remove("hidden");
-        loadingEl.classList.add("hidden");
-        memosIsLoading = false;
-        return;
-      }
-
-      memos.forEach(function (memo) {
-        container.appendChild(memosCreateCard(memo));
-      });
-
-      memosNextPageToken = data.nextPageToken || null;
-      memosHasMore = !!memosNextPageToken;
-
-      if (memosHasMore) {
-        loadMoreWrapper.classList.remove("hidden");
-      }
-    } catch (err) {
-      console.error("Failed to load memos:", err);
-      if (!append || container.children.length === 0) {
-        errorEl.classList.remove("hidden");
-      }
-    } finally {
-      loadingEl.classList.add("hidden");
-      memosIsLoading = false;
-    }
-  }
-
-  function memosInit() {
-    memosNextPageToken = null;
-    memosHasMore = true;
-    memosLoadMemos(false);
-
-    const loadMoreBtn = document.getElementById("memos-load-more-btn");
-    if (loadMoreBtn) {
-      loadMoreBtn.onclick = function () {
-        memosLoadMemos(true);
-      };
-    }
-
-    const retryBtn = document.getElementById("memos-retry-btn");
-    if (retryBtn) {
-      retryBtn.onclick = function () {
-        memosLoadMemos(false);
-      };
-    }
-  }
-
-  memosInit();
-
-  document.addEventListener("swup:contentReplaced", function () {
-    if (document.getElementById("memos-feed-container")) {
-      setTimeout(memosInit, 100);
-    }
-  });
-</script>
