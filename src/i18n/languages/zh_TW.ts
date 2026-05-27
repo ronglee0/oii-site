@@ -300,7 +300,7 @@ export const zh_TW: Translation = {
 	[Key.codeCollapsibleCollapsed]: "代碼區塊已折疊",
 
 	// 備忘錄頁面
-	[Key.memos]: "備忘錄",
+	[Key.memos]: "動態",
 	[Key.memosSubtitle]: "短想法與筆記",
 	[Key.memosLoadMore]: "載入更多",
 	[Key.memosLoading]: "載入中...",

@@ -298,7 +298,7 @@ export const zh_CN: Translation = {
 	[Key.codeCollapsibleCollapsed]: "代码块已折叠",
 
 	// 相册页面
-	[Key.memos]: "备忘录",
+	[Key.memos]: "动态",
 	[Key.memosSubtitle]: "短想法与笔记",
 	[Key.memosLoadMore]: "加载更多",
 	[Key.memosLoading]: "加载中...",
