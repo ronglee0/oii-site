@@ -46,6 +46,6 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
 	[LinkPreset.Memos]: {
 		name: i18n(I18nKey.memos),
 		url: "/memos/",
-		icon: "material-symbols:edit-note",
+		icon: "material-symbols:sticky-note-2",
 	},
 };
