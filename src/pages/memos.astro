@@ -85,7 +85,7 @@ function getAttachmentUrl(att: { name: string; filename: string; externalLink?: 
       <div class="mb-4">
         <div class="flex items-center gap-3 mb-3">
           <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
-            <Icon name="material-symbols:edit-note" class="text-[1.5rem]" />
+            <Icon name="fa7-regular:note-sticky" class="text-[1.2rem]" />
           </div>
           <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
             {title}
@@ -111,20 +111,18 @@ function getAttachmentUrl(att: { name: string; filename: string; externalLink?: 
                   {formatTime(memo.createTime)}
                 </div>
                 <div
-                  class="custom-md text-sm leading-relaxed text-neutral-800 dark:text-neutral-200"
+                  class="custom-md text-base leading-relaxed text-neutral-800 dark:text-neutral-200"
                   set:html={renderMarkdown(memo.content || "")}
                 />
                 {images.length > 0 && (
-                  <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+                  <div class="moment-images grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
                     {images.map((img) => (
-                      <a href={getAttachmentUrl(img)} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={getAttachmentUrl(img)}
-                          alt={img.filename || ""}
-                          loading="lazy"
-                          class="rounded-lg w-full h-32 object-cover hover:opacity-80 transition-opacity"
-                        />
-                      </a>
+                      <img
+                        src={getAttachmentUrl(img)}
+                        alt={img.filename || ""}
+                        loading="lazy"
+                        class="rounded-lg w-full h-32 object-cover cursor-zoom-in hover:opacity-80 transition-opacity"
+                      />
                     ))}
                   </div>
                 )}
