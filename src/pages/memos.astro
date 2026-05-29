@@ -106,9 +106,7 @@ function formatTime(iso: string): string {
 // 例如: /file/attachments/5c90a5db8929459da21e01/photo.jpg
 function getAttachmentUrl(att: { name: string; filename: string; externalLink?: string }): string {
 	if (att.externalLink) return att.externalLink
-	const base = `${memosConfig.apiUrl}/file/${att.name}/${encodeURIComponent(att.filename)}`
-	const token = memosConfig.accessToken
-	return token ? `${base}?token=${token}` : base
+	return `${memosConfig.apiUrl}/file/${att.name}/${encodeURIComponent(att.filename)}`
 }
 ---
 
